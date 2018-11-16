@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -190,7 +190,11 @@ void View::init(content::base &c)
 				page_tmp = it->second.get_value<page_t>();
 				page_tmp.id = tools::str2num<int>(it->first.str());
 				pages_.push_back(page_tmp);
+#if __cplusplus>=201103L
+				menu_tmp[page_tmp.order_id] = std::make_pair(page_tmp.name,page_tmp.url);
+#else
 				menu_tmp[page_tmp.order_id] = std::make_pair<std::string,std::string>(page_tmp.name,page_tmp.url);
+#endif
 				menu_max_ = (page_tmp.order_id>menu_max_)?page_tmp.order_id:menu_max_;
 				
 				if(page_tmp.menu & MENU_HEADER)
@@ -395,10 +399,18 @@ void View::alert(std::string const& text, std::string const& type, bool enabled,
 
 void View::menu_add(const std::string& menu, const std::string& name, const std::string& url)
 {
+#if __cplusplus>=201103L
+	menu_[menu][menu_max_++] = std::make_pair(name, url);
+#else
 	menu_[menu][menu_max_++] = std::make_pair<std::string, std::string>(name, url);
+#endif
 }
 
 void View::menu_add(const std::string& menu, const std::string& name, const std::string& url, int order_id )
 {
+#if __cplusplus>=201103L
+	menu_[menu][order_id] = std::make_pair(name, url);
+#else
 	menu_[menu][order_id] = std::make_pair<std::string, std::string>(name, url);
+#endif
 }

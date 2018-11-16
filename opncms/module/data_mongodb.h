@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -16,7 +16,11 @@
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#if __cplusplus>=201103L
+#pragma GCC diagnostic ignored "-Wpedantic"
+#else
 #pragma GCC diagnostic ignored "-pedantic"
+#endif
 #include "mongo/client/dbclient.h"
 #include "mongo/db/json.h"
 #include "mongo/bson/bsonobj.h"

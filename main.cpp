@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 {
 	if (argc < 2)
 	{
-		std::cout << "opnCMS v" << opncms_VERSION_MAJOR << "." << opncms_VERSION_MINOR << "." << opncms_VERSION_PATCH << " r" << opncms_REVISION << std::endl;
+		std::cout << "opnCMS v" << opncms_VERSION_MAJOR << "." << opncms_VERSION_MINOR << "." << opncms_VERSION_PATCH << " rev." << opncms_REVISION << std::endl;
 		std::cout << "Usage: " << argv[0] << " [-c config]" << std::endl;
 		return 1;
 	}

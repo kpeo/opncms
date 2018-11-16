@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -23,7 +23,7 @@
 
 #include <opncms/module/data.h>
 #include <opncms/bcrypt.h>
-#include <format.h>
+#include <fmt/format.h>
 
 #define MAX_LOGIN_ATTEMPTS 5
 #define SEED_DEFAULT 1024

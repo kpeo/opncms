@@ -1,7 +1,7 @@
 {
 	"plugins" : {
 		"root" : "plugins",
-		"enabled" : [ "user" , "admin" ],
+		"enabled" : [ "user" ],
 
                 "admin" : {
 			"skin" : "admin_view",

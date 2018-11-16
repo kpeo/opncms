@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -102,11 +102,14 @@ site::site(cppcms::service& srv, int argc, char** argv)
 	cppcms::json::value v;
 	if(ioc::get<Data>().driver().get(v, "pages"))
 	{
-		if(v.is_undefined() || v.is_null())
+		if(v.is_undefined() || v.is_null()) {
 			BOOSTER_LOG(debug, __FUNCTION__) << "There is no data for pages";
-		else
-		{
-			BOOSTER_LOG(debug, __FUNCTION__) << "Proceed with pages"; // v = "id" : {...}
+		}
+		else if(v.type() != cppcms::json::is_object) {
+			BOOSTER_LOG(debug, __FUNCTION__) << "Wrong type of pages' data";
+		}
+		else {
+			BOOSTER_LOG(debug, __FUNCTION__) << "Proceed with pages' data"; // v = "id" : {...}
 			std::string page_name, page_url;
 			int page_type;
 			cppcms::json::object::const_iterator it = v.object().begin();

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -39,7 +39,7 @@ std::string bcrypt_hash(const std::string& key,const std::string& salt)
 	void* data = NULL;
 	int size;
 	
-	if(key.empty() || salt.empty())
+	if(key.empty() && salt.empty())
 		return "";
 	
 	BOOSTER_LOG(debug,__FUNCTION__) << "generate hash";

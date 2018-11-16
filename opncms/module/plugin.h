@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -33,7 +33,7 @@
 #include <map>
 #include <booster/shared_object.h>
 //#include <version.h>
-#include <format.h>
+#include <fmt/format.h>
 
 const std::string api_version = "0.0.1";
 class Plug;
@@ -51,10 +51,10 @@ public:
 	virtual std::string skin() = 0; //skin name (plugin name + "_view")
 	virtual std::string view(std::string const &) = 0; //view name (plugin name + input string)
 //	virtual std::string id() = 0; //id (priority)
-	virtual const std::string& name() = 0; //description
-	virtual const std::string& shortname() = 0; //shortname (latin)
-	virtual const std::string& slug() = 0; //path for url
-	virtual const std::string& version() = 0;
+	virtual std::string name() const = 0; //description
+	virtual std::string shortname() const = 0; //shortname (latin)
+	virtual std::string slug() const = 0; //path for url
+	virtual std::string version() const = 0;
 	virtual tools::vec_str& map() = 0;
 
 	virtual cppcms::base_content& html_css() = 0;
@@ -239,6 +239,8 @@ public:
 		for(plt::const_iterator it = pl_.begin(); it != pl_.end(); it++)
 		{
 			//WARN: what if second.first is undefined?
+			BOOSTER_LOG(debug, __FUNCTION__) << "get positions for plugin " << it->first << " at URL pointer " << it->second.first;
+			BOOSTER_LOG(debug, __FUNCTION__) << std::string(it->second.first->shortname());
 			if(it->second.first->is_css())
 				pos_["css"]++;
 			if(it->second.first->is_js_head())
@@ -287,7 +289,7 @@ public:
 		std::string libf = tools::empty_string + "." + SLH+path+SLH + lib + ".so";
 #endif
 		std::string error;
-		if(!plugin_holder.open(libf,error)) {
+		if(!plugin_holder.open(libf, error, booster::shared_object::load_now)) {
 			throw cppcms::cppcms_error("plugin: failed to load shared object " + libf + ": " + error);
 		}
 		//TODO: while CppCMS can't attach plugins by application without config
@@ -372,7 +374,7 @@ public:
 	//bool add(std::string name, booster::shared_ptr<Plugin>& pl, booster::shared_ptr<PluginRpc>& plr)
 	bool add(const std::string& name, Plugin* pl, PluginRpc* plr, const std::string& version)
 	{
-		BOOSTER_LOG(debug, __FUNCTION__) << "Add plugin " << name << ", pointers: URL=" << pl << ", RPC=" << plr;
+		BOOSTER_LOG(debug, __FUNCTION__) << "Add plugin " << name << ", pointers: URL=" << pl << ", RPC=" << plr << ", version: " << version;
 		
 		//Just to be sure. We should not get here
 		if(get(name) != NULL)

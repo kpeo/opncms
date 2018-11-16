@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <iostream>
 #include <vector>
+#include <string.h>
 
 #include <openssl/ssl.h>
 #include <auth-client.h>

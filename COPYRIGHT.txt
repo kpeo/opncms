@@ -2,7 +2,7 @@
     opnCMS -- C++ frontend for CppCMS web-framework
     ---------------------------------------
 
-    Copyright (C) 2010-2016 Vladimir Yakunin <kpeo.y3k@gmail.com>
+    Copyright (C) 2010-2018 Vladimir Yakunin <kpeo.y3k@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

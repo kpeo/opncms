@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -22,6 +22,29 @@
 ///
 /// \cond internal
 ///
+
+//Bitmask can represents page in several menu
+enum menu_mask
+{
+		MENU_HEADER		= 1,
+		MENU_SIDEBAR	= 2,
+		MENU_USERBAR	= 4
+};
+
+struct page_t
+{
+        int id;
+        int order_id;
+        std::string name;
+        std::string icon;
+        std::string url;
+        std::string type;
+        bool authed;
+        bool active;
+        int menu;
+        cppcms::json::value data;
+};
+
 typedef std::vector< std::pair<std::string, std::string> > menu_t;
 
 namespace apps { class site; }

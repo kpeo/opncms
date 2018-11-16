@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -41,19 +41,41 @@ int test_close()
 	return 0;
 }
 
-int main()
+std::string input_args(const std::string& name, bool empty)
+{
+	std::string s;
+	std::cout << "Please enter localhost e-mail " << name << ((empty)?" (or '.' followed by enter for none): ":": ");
+	std::cin >> s;
+	return (empty && s == ".")?"":s;
+}
+
+int main(int argc, char* argv[])
 {
 	std::string user;
 	std::string password;
 	std::string tlspassword;
-	std::cout << "Please enter localhost e-mail username: ";
-	std::cin >> user;
-	std::cout << "Please enter localhost e-mail password: ";
-	std::cin >> password;
-	std::cout << "Please enter localhost TLS password (or '.' followed by enter for none): ";
-	std::cin >> tlspassword;
-	if(tlspassword == ".")
-		tlspassword = "";
+
+	switch(argc){
+		case 1:
+			user = input_args("username", false);
+			password = input_args("password", false);
+			tlspassword = input_args("TLS password", true);
+			break;
+		case 2:
+			user = argv[1];
+			password = input_args("password", false);
+			tlspassword = input_args("TLS password", true);
+			break;
+		case 3:
+			user = argv[1];
+			password = argv[2];
+			tlspassword = "";
+			break;
+		case 4:
+			user = argv[1];
+			password = argv[2];
+			tlspassword = argv[3];
+	}
 	if (test_open("localhost:25", user, password, tlspassword)==0 && test_send(user)==0 && test_send(user)==0 && test_close()==0) {
 		std::cout << "Success" << std::endl;
 		return EXIT_SUCCESS;

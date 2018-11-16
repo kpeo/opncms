@@ -1,20 +1,5 @@
 {
 	"opncms" : {
-		"links" : {
-			"home" : "/home",
-			"news" : "/news",
-			"login" : "/login",
-			"logout" : "/logout",
-			"register" : "/register",
-			"invite" : "/invite",
-		},
-		"menu" : {
-			"header" : ["home","login","register"],
-			"header_user" : ["home","invite","logout"],
-			"sidebar" : ["news","|"],
-			"sidebar_user" : [],
-		},
-
 		"script" : "/opncms",
 		"media" :"/templates",
 		"syntax_highlighter" : "/templates/sh",
@@ -27,28 +12,20 @@
                 "connection_string" : "sqlite3:db=./db/opncms.db;@pool_size=16",
                 //
                 // PostgreSQL Sample Connection String
-                // "connection_string" : "postgresql:dbname=opncms;@pool_size=16",
+                // "connection_string" : "postgresql:dbname=wikipp;@pool_size=16",
                 //
                 // MySQL Sample Connection String
                 //
-                // "connection_string" : "mysql:database=opncms;user=root;password=root;@pool_size=16",
+                // "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16",
                 //
                 // In Some cases mysql works faster without prepared statements as it uses query cache, so you
                 // may change this string to:
                 //
-                // "connection_string" : "mysql:database=opncms;user=root;password=root;@pool_size=16;@use_prepared=off",
+                // "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16;@use_prepared=off",
                 //      
-                "scm" : {
-                        "driver" : "git",
-                        "params" : {
-				"type" : "command", 
-				"path" : "/var/www/opncms/scm"
-			},
-                },
 		"templates" : {
 			"default" : "/var/www/opncms/scm/default.tmp",
 			"users" : "/var/www/opncms/scm/users.tmp",
-			"projects" : "/var/www/opncms/scm/projects.tmp"
 		},
 		"sql" : {
                         "driver" : "sqlite3",
@@ -65,19 +42,19 @@
                 },
 
                 // Sqlite3 Sample Connection String
-//                "connection_string" : "sqlite3:db=./db/opncms.db;@pool_size=16",
+//                "connection_string" : "sqlite3:db=./db/wikipp.db;@pool_size=16",
                 //
                 // PostgreSQL Sample Connection String
-                // "connection_string" : "postgresql:dbname=opncms;@pool_size=16",
+                // "connection_string" : "postgresql:dbname=wikipp;@pool_size=16",
                 //
                 // MySQL Sample Connection String
                 //
-                // "connection_string" : "mysql:database=opncms;user=root;password=root;@pool_size=16",
+                // "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16",
                 //
                 // In Some cases mysql works faster without prepared statements as it uses query cache, so you
                 // may change this string to:
                 //
-                // "connection_string" : "mysql:database=opncms;user=root;password=root;@pool_size=16;@use_prepared=off",
+                // "connection_string" : "mysql:database=wikipp;user=root;password=root;@pool_size=16;@use_prepared=off",
                 //      
 
 

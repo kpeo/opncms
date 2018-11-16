@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -9,6 +9,7 @@
 
 #include <opncms/site.h>
 #include <opncms/rpc.h>
+#include "version.h"
 
 ///
 /// \cond internal
@@ -21,18 +22,32 @@ rpc::rpc(cppcms::service& srv, cppcms::application& app)
 app_(app)
 {
 	bind("system.listMethods",cppcms::rpc::json_method(&rpc::methods,this),method_role);
+	bind("health",cppcms::rpc::json_method(&rpc::health,this),method_role);
 	bind("upload",cppcms::rpc::json_method(&rpc::upload,this),method_role);
 	bind("rss",cppcms::rpc::json_method(&rpc::rss,this),method_role);
 	bind("set_locale",cppcms::rpc::json_method(&rpc::set_locale,this),method_role);
-
-	methods_ = boost::assign::list_of ("system.listMethods")("upload")("rss")("set_locale");
-	BOOST_ASSERT( methods_.size() == 4 );
+#if __cplusplus>=201103L
+	methods_ = {"system.listMethods", "health", "upload", "rss", "set_locale"};
+#else
+	methods_ = boost::assign::list_of ("system.listMethods")("health")("upload")("rss")("set_locale");
+	BOOST_ASSERT( methods_.size() == 5 );
+#endif
 }
 
 void rpc::methods()
 {
 	BOOSTER_LOG(debug, __FUNCTION__);
 	return_result(methods_);
+}
+
+void rpc::health()
+{
+        BOOSTER_LOG(debug,__FUNCTION__);
+	cppcms::json::value v;
+	v["version"] = fmt::format("{0}.{1}.{2}", opncms_VERSION_MAJOR, opncms_VERSION_MINOR, opncms_VERSION_PATCH);
+	v["commit"] = fmt::format("{}", opncms_REVISION);
+	v["database"] = ioc::get<Data>().driver_name();
+        return_result(v);
 }
 
 void rpc::upload(std::string file)

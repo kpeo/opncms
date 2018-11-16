@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -86,7 +86,7 @@ Data::Data(cppcms::application& app)
 #ifdef _OPNCMS_CPPCMS_OLD
 :app_(app), dsql_(), dfile_(), dmongodb_(), cache_(app)
 #else
-:app_(app), dsql_(), dfile_(), dmongodb_(), cache_()
+:app_(app), dsql_(), dfile_(), dmongodb_(), cache_(app.service())
 #endif
 {
 	BOOSTER_LOG(debug,__FUNCTION__);

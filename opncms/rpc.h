@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -17,7 +17,10 @@
 #include <cppcms/http_file.h>
 #include <cppcms/http_context.h>
 #include <cppcms/session_interface.h>
+
+#if !(__cplusplus>=201103L)
 #include <boost/assign/list_of.hpp>
+#endif
 
 ///
 /// \cond internal
@@ -43,6 +46,7 @@ class rpc : public cppcms::rpc::json_rpc_server
 public:
 	rpc(cppcms::service &, cppcms::application &);
 
+	void health();
 	void methods();
 	void upload(std::string);
 	void rss();

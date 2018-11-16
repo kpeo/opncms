@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -66,10 +66,12 @@ bool DataSql::exists(const std::string& storage)
 	int cnt = -1;
 	BOOSTER_LOG(debug,__FUNCTION__) << "storage(" << storage << ")";
 
-	if(storage.empty())
+	if(storage.empty()) {
+		BOOSTER_LOG(notice,__FUNCTION__) << "storage is empty";
 		return false;
+	}
 
-	std::string k = std::string("data:sql:") + ioc::get<Data>().driver_name() + ":" + storage;
+	std::string k = std::string("data:sql:") + ioc::get<Data>().driver_name() + ":" + storage + "_rows";
 	
 	if(ioc::get<Data>().cache().fetch_frame(k,cache_data))
 		return true;
@@ -99,6 +101,7 @@ bool DataSql::exists(const std::string& storage)
 		return false;
 	}
 	BOOSTER_LOG(debug,__FUNCTION__) << "table has " << cnt << " rows";
+	storage_changed_ = true;
 	return (cnt>=0);
 }
 

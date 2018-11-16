@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (C) 2013-2016 Vladimir Yakunin (kpeo) <opncms@gmail.com>
+//  Copyright (C) 2013-2018 Vladimir Yakunin (kpeo) <opncms@gmail.com>
 //
 //  The redistribution terms are provided in the COPYRIGHT.txt file
 //  that must be distributed with this source code.
@@ -293,8 +293,16 @@ void json_set(cppcms::json::value& v, const std::string& key, cppcms::json::valu
 		{
 			// Adding Array
 			case cppcms::json::is_array: {
-				// Array -> Array (replace)
-				v.at(key,value);
+				if(vv.type() == cppcms::json::is_array) {
+					// Array -> Array (add)
+                                        cppcms::json::array& t = v.at(key).array();
+					t.push_back(value);
+				}
+				else {
+				
+					// Array -> Array (replace)
+					v.at(key,value);
+				}
 				break;
 			}
 			// Adding Object

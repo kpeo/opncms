@@ -7,7 +7,8 @@ enable_testing()
 find_package(Doxygen)
 
 option(BUILD_DOCUMENTATION "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
-option(MONGODB_ORIGINAL "Use installed libraries" OFF)
+option(MONGODB_ORIGINAL "Use installed mongodb library" OFF)
+option(CPPCMS_OLD "Use CppCMS 1.x earlier then 1.1.0" OFF)
 option(USE_STATIC_VIEW "Compile view statically into opnpcms" OFF)
 
 if(BUILD_DOCUMENTATION)
@@ -58,24 +59,49 @@ if(NOT CMAKE_BUILD_TYPE)
 	      FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-# against the conflict with unistd.h crypt declaration
 if (CMAKE_COMPILER_IS_GNUCXX)
-  set ( CMAKE_CXX_FLAGS "-Wall -Wno-long-long -pedantic -pg -D__SKIP_GNU" )
-#  set ( CMAKE_CXX_FLAGS_DEBUG "")
-#  set ( CMAKE_CXX_FLAGS_RELEASE  "" )
+  #use __SKIP_GNU for the crypt declaration's conflict in unistd.h
+  set ( CMAKE_CXX_FLAGS "-Wall -Wno-long-long -ldl -pedantic -pg -D__SKIP_GNU" )
+
+  execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+  if (GCC_VERSION VERSION_GREATER 6.0 OR GCC_VERSION VERSION_EQUAL 6.0)
+    message(STATUS "C++14 activated")
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14" )
+    #    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    set ( MONGODB_FLAGS "--c++11=on" )
+    string (REPLACE "-pedantic" "-Wpedantic" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+  elseif (GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8)
+    string (REPLACE "-pedantic" "-Wpedantic" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set ( MONGODB_FLAGS "--c++11=on" )
+  elseif (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7)
+    message(STATUS "C++11 activated")
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11" )
+    set ( MONGODB_FLAGS "--c++11=on" )
+  elseif(GCC_VERSION VERSION_GREATER 4.3 OR GCC_VERSION VERSION_EQUAL 4.3)
+    message(WARNING "C++0x activated")
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x" )
+  else()
+    message(WARNING "C++98 activated")
+  endif()
+
+  if(CPPCMS_OLD)
+    set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_OPNCMS_CPPCMS_OLD" )
+  endif ()
+
 endif ()
 
 set (MONGODB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/mongo-cxx-driver)
 set (BCRYPT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/crypt_blowfish-1.2)
-set (CPPFORMAT_SRC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/cppformat)
-set (CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opncms ${BCRYPT_SRC} ${MONGODB_SRC}/build/install/include ${CPPFORMAT_SRC})
+set (FMTLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/fmt)
+set (CMAKE_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/opncms ${BCRYPT_SRC} ${MONGODB_SRC}/build/install/include ${FMTLIB_SRC})
 
 if (NOT EXISTS ${MONGODB_SRC})
-	execute_process(COMMAND git clone https://github.com/mongodb/mongo-cxx-driver.git ${MONGODB_SRC})
+        execute_process(COMMAND git clone -b "legacy-1.1.3" https://github.com/mongodb/mongo-cxx-driver.git ${MONGODB_SRC})
 endif ()
 
-if (NOT EXISTS ${CPPFORMAT_SRC})
-	execute_process(COMMAND git clone https://github.com/cppformat/cppformat.git ${CPPFORMAT_SRC})
+if (NOT EXISTS ${FMTLIB_SRC})
+        execute_process(COMMAND git clone -b "4.0.0" https://github.com/fmtlib/fmt.git ${FMTLIB_SRC})
 endif ()
 
 if(NOT MONGODB_ORIGINAL)
@@ -92,15 +118,15 @@ else()
 endif()
 
 link_directories(${BCRYPT_INC})
-link_directories(${CPPFORMAT_SRC})
+link_directories(${FMTLIB_SRC})
 
 find_library(CPPCMS cppcms)
 find_library(BOOSTER booster)
 find_library(CPPDB cppdb)
 find_library(MONGODB mongoclient)
-find_library(CPPFORMAT libcppformat)
+find_library(FMTLIB libfmt)
 find_library(BOOST_SYSTEM boost_system)
-find_library(BOOST_FILESYSTEM boost_filesystem-mt)
+find_library(BOOST_FILESYSTEM boost_filesystem)
 find_library(ESMTP esmtp)
 
 find_library(BOOST_THREAD boost_thread)
@@ -110,13 +136,13 @@ find_path(CPPCMS_INC cppcms/application.h)
 find_path(BOOSTER_INC booster/shared_ptr.h)
 find_path(CPPDB_INC cppdb/frontend.h)
 find_path(BCRYPT_INC ow-crypt.h)
-find_path(CPPFORMAT_INC format.h)
+find_path(FMTLIB_INC fmt/format.h)
 
 include_directories(${CPPCMS_INC})
 include_directories(${BOOSTER_INC})
 include_directories(${CPPDB_INC})
 include_directories(${BCRYPT_INC})
-include_directories(${CPPFORMAT_INC})
+include_directories(${FMTLIB_INC})
 include_directories(${PROJECT_BINARY_DIR})
 include_directories(.)
 
@@ -179,22 +205,22 @@ add_custom_target(
 
 add_custom_target(
 	libmongoclient
-	COMMAND scons install --prefix=${MONGODB_SRC}/build/install #--sharedclient
+	COMMAND scons install --prefix=${MONGODB_SRC}/build/install ${MONGODB_FLAGS} #--sharedclient
 	WORKING_DIRECTORY ${MONGODB_SRC}
 )
 
 add_custom_target(
-	libcppformat
-	COMMAND cmake .
-	COMMAND make
-	WORKING_DIRECTORY ${CPPFORMAT_INC}
+        libfmt
+        COMMAND cmake .
+        COMMAND make
+        WORKING_DIRECTORY ${FMTLIB_INC}
 )
 
 set(BCRYPT_SHARED ${BCRYPT_INC}/libbcrypt.so)
 set(BCRYPT_STATIC ${BCRYPT_INC}/libbcrypt.a)
 
-set(CPPFORMAT_SHARED ${CPPFORMAT_INC}/libcppformat.so)
-set(CPPFORMAT_STATIC ${CPPFORMAT_INC}/libcppformat.a)
+set(FMTLIB_SHARED ${FMTLIB_INC}/fmt/libfmt.so)
+set(FMTLIB_STATIC ${FMTLIB_INC}/fmt/libfmt.a)
 
 if(USE_STATIC_VIEW)
 	add_executable(opncms ${SRC} ${CMAKE_CURRENT_BINARY_DIR}/opncms_view.cpp)
@@ -206,8 +232,8 @@ else()
 #        add_dependencies(opncms libbcrypt)
 endif()
 
-target_link_libraries(opncms ${BOOSTER} ${CPPCMS} ${CPPDB} ${BCRYPT_STATIC} ${MONGODB_STATIC} ${CPPFORMAT_STATIC} ${ESMTP} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${BOOST_THREAD} ${BOOST_REGEX})
-add_dependencies(opncms libbcrypt libcppformat libmongoclient revisiontag)
+target_link_libraries(opncms ${BOOSTER} ${CPPCMS} ${CPPDB} ${BCRYPT_STATIC} ${MONGODB_STATIC} ${FMTLIB_STATIC} ${ESMTP} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${BOOST_THREAD} ${BOOST_REGEX})
+add_dependencies(opncms libbcrypt libfmt libmongoclient revisiontag)
 
 #  Localization
 set(LOCALES ru)
@@ -281,7 +307,7 @@ set(TESTDIR "${CMAKE_CURRENT_SOURCE_DIR}/test")
 
 foreach(TEST ${BASIC_TESTS})
         add_executable(test_${TEST} ${TESTDIR}/test_${TEST}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/${TEST}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/esmtp.cpp)
-        target_link_libraries(test_${TEST} ${BOOSTER} ${CPPCMS} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${CPPFORMAT_STATIC} ${ESMTP})
+        target_link_libraries(test_${TEST} ${BOOSTER} ${CPPCMS} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${FMTLIB_STATIC} ${ESMTP})
         add_test(test_${TEST} test_${TEST})
         #set_tests_properties(test_${TEST} PROPERTIES PASS_REGULAR_EXPRESSION "Passed;All ok;Ok")
 endforeach()
@@ -291,16 +317,16 @@ add_test(test_base64 test_base64)
 
 add_executable(test_esmtp ${TESTDIR}/test_esmtp.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/esmtp.cpp)
 target_link_libraries(test_esmtp ${ESMTP} ${BOOSTER})
-add_test(test_esmtp test_esmtp)
+add_test(test_esmtp test_esmtp test test@localhost)
 
 add_executable(test_bcrypt ${TESTDIR}/test_bcrypt.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcrypt.cpp)
 target_link_libraries(test_bcrypt ${BOOSTER} ${BCRYPT_STATIC})
 add_test(test_bcrypt test_bcrypt)
 
 add_executable(test_data ${TESTDIR}/test_data.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/tools.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/esmtp.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_sql.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_file.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_mongodb.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data.cpp)
-target_link_libraries(test_data ${BOOSTER} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${CPPCMS} ${CPPDB} ${ESMTP} ${MONGODB_STATIC} ${CPPFORMAT_STATIC} ${BOOST_THREAD} ${BOOST_REGEX})
+target_link_libraries(test_data ${BOOSTER} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${CPPCMS} ${CPPDB} ${ESMTP} ${MONGODB_STATIC} ${FMTLIB_STATIC} ${BOOST_THREAD} ${BOOST_REGEX})
 add_test(test_data test_data)
 
 add_executable(test_auth ${TESTDIR}/test_auth.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/tools.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/esmtp.cpp ${CMAKE_CURRENT_SOURCE_DIR}/src/bcrypt.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_sql.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_file.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data_mongodb.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/data.cpp ${CMAKE_CURRENT_SOURCE_DIR}/module/auth.cpp)
-target_link_libraries(test_auth ${BOOSTER} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${CPPCMS} ${CPPDB} ${BCRYPT_STATIC} ${CPPFORMAT_STATIC} ${ESMTP} ${MONGODB_STATIC} ${BOOST_THREAD} ${BOOST_REGEX})
+target_link_libraries(test_auth ${BOOSTER} ${BOOST_SYSTEM} ${BOOST_FILESYSTEM} ${CPPCMS} ${CPPDB} ${BCRYPT_STATIC} ${FMTLIB_STATIC} ${ESMTP} ${MONGODB_STATIC} ${BOOST_THREAD} ${BOOST_REGEX})
 add_test(test_auth test_auth)
